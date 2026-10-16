@@ -2,19 +2,26 @@ name: CD
 
 on:
   push:
-    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build-and-push:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/build-push-action@v5
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cicd-lab:latest
+          tags: ghcr.io/trungvinhds/cicd-lab:${{ github.ref_name }}
